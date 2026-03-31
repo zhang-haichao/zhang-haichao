@@ -1,31 +1,29 @@
 name: Play_TicTacToe
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
   schedule:
     - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profile-tictactoe-master
+  cancel-in-progress: false
 
 jobs:
   play:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-
-      - name: Cache pip
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
+          cache: 'pip'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -38,9 +36,10 @@ jobs:
 
       - name: Commit and push
         run: |
-          git diff
-          git add .
-          git config --global user.email "github-action-bot@example.com"
-          git config --global user.name "GitHub Action Bot"
-          git commit -m "Updated game" -a
-          git push
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add README.md game_state.json tile_count.json
+          git diff --staged --quiet && echo "No changes to commit" && exit 0
+          git commit -m "Updated game [skip ci]"
+          git pull --rebase origin master
+          git push origin HEAD:master
