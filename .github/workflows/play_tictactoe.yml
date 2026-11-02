@@ -1,7 +1,7 @@
 name: Play_TicTacToe
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 */12 * * *'   # 每 12 小时一次，控制 Linkly API 月调用量在 100 以内
   workflow_dispatch:
 
 permissions:
@@ -45,7 +45,6 @@ jobs:
           if git push origin HEAD:master; then
             exit 0
           fi
-
           echo "Push rejected, retry once from latest origin/master..."
           git fetch origin master
           git reset --hard origin/master
