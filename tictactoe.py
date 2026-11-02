@@ -40,6 +40,10 @@ def get_tile_count():
 
     r = requests.get(url=url, headers=headers)
     json_data = r.json()
+
+    if isinstance(json_data, dict) and json_data.get("error") == "API limit exceeded":
+        print(f"Linkly API limit reached ({json_data.get('current_usage')}/{json_data.get('limit')}), skip this run.")
+        sys.exit(0)
     if not isinstance(json_data, list):
         raise RuntimeError(f"Unexpected Linkly response: {json_data}")
 
